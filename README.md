@@ -6,4 +6,4 @@ Introducing `saasy-events-eventmgmt` – the brains behind event operations. Cra
 ## 🛠️ Technologies Used
 - **Language:** Python
 - **Framework:** FastAPI
-- **Database:** MySQL (via `saasy-events-db`)
+- **Database:** MySQL (via `SaaSy-Events-database`)
