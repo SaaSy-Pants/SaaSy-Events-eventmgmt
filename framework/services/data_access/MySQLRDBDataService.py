@@ -24,27 +24,15 @@ class MySQLRDBDataService(DataDataService):
         )
         return connection
 
-
-    def get_data_objects(self, database_name: str, table_name: str):
-        """
-        Check if the connection to the database is successful by selecting all data
-        from a specific table.
-        Args:
-            - database_name: Name of the database to query.
-            - table_name: Name of the table to fetch all records from.
-        Returns:
-            - A dictionary with connection status and result of the query (all rows).
-        Raises:
-            - Exception if the connection or query execution fails.
-        """
+    def get_data_objects(self, database_name: str, table_name: str, limit: int, offset: int):
         connection = None
         try:
             # Establish a connection
             connection = self._get_connection()
 
-            # Create a cursor and execute a query to select all rows from the given table
+            # Create a cursor and execute a paginated query
             cursor = connection.cursor()
-            query = f"SELECT * FROM {database_name}.{table_name}"
+            query = f"SELECT * FROM {database_name}.{table_name} LIMIT {limit} OFFSET {offset}"
             cursor.execute(query)
 
             # Fetch all the results (each row will be a dictionary)

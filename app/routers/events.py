@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from app.models.event import Event
 from app.resources.event_resource import EventResource
@@ -15,10 +15,11 @@ async def get_event(eid: str) -> Event:
 
 
 @router.get("/events", tags=["events"])
-async def get_events():
+async def get_events(limit: int = Query(10, description="Number of items per page"), 
+                     offset: int = Query(0, description="Offset for pagination")):
     eve_resource = EventResource(config=None)
     try:
-        result = eve_resource.get_all_events()
+        result = eve_resource.get_all_events(limit=limit, offset=offset)
         return {"status": "connected", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database connection failed: {str(e)}")

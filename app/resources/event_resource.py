@@ -29,10 +29,10 @@ class EventResource(BaseResource):
 
         result = Event(**result)
         return result
-
-    def get_all_events(self):
+    
+    def get_all_events(self, limit: int, offset: int):
         data_service = self.data_service
-        result = data_service.get_data_objects(self.database, self.collection)
+        result = data_service.get_data_objects(self.database, self.collection, limit, offset)
         return result
     
     def insert_event(self, event: Event) -> bool:
