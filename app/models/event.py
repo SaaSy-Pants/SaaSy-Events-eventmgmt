@@ -16,7 +16,8 @@ class Event(BaseModel):
     EventDate: date
     EventTimeStart: timedelta
     EventTimeEnd: timedelta
-    TicketsAvb: int = Field(..., ge=0, le=32767, description="Available Tickets (smallint)")
+    GuestsRem: int = Field(..., ge=0, le=32767, description="Number of Guests remaining (smallint)")
+    MaxGuestsPerTicket: int
     Price: int = Field(..., ge=0, description="Price of the event")
 
     class Config:
@@ -31,7 +32,8 @@ class Event(BaseModel):
                 "EventDate": "2024-05-15",
                 "EventTimeStart": "09:00:00",
                 "EventTimeEnd": "17:00:00",
-                "TicketsAvb": 200,
+                "GuestsRem": 197,
+                "MaxGuestsPerTicket": 3,
                 "Price": 150
             }
         }
