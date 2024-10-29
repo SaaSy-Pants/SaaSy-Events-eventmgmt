@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from pydantic import BaseModel, Field
-from datetime import date, time
+from datetime import date, timedelta
 
 
 class Event(BaseModel):
@@ -14,8 +14,8 @@ class Event(BaseModel):
     EventDesc: str
     Location: str
     EventDate: date
-    EventTimeStart: time
-    EventTimeEnd: time
+    EventTimeStart: timedelta
+    EventTimeEnd: timedelta
     TicketsAvb: int = Field(..., ge=0, le=32767, description="Available Tickets (smallint)")
     Price: int = Field(..., ge=0, description="Price of the event")
 

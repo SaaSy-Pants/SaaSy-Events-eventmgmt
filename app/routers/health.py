@@ -14,7 +14,7 @@ async def health_check():
 
     # Test database connection with a simple query
     try:
-        result = data_service.check_connection(eve_resource.database, eve_resource.collection)
+        result = eve_resource.get_all_events()
         return {"status": "connected", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database connection failed: {str(e)}")
