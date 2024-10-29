@@ -3,13 +3,20 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import events, health
+from app.middleware.logging import LoggingMiddleware
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*']
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+#Logging Middleware
+app.add_middleware(LoggingMiddleware)
 
 app.include_router(events.router)
 app.include_router(health.router)
