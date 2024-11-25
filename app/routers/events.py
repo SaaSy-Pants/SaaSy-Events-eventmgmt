@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import JSONResponse
 
 from app.models.event import Event
 from app.resources.event_resource import EventResource
@@ -32,7 +33,12 @@ async def create_event(event: Event):
         success = eve_resource.insert_event(event)
         if not success:
             raise HTTPException(status_code=500, detail="Failed to create the event")
-        return {"message": "Event created successfully", "EID": event.EID}
+        resource_url = f"/events/{event.EID}"
+        return JSONResponse(
+            status_code=201,
+            content={"message": "Event created successfully"},
+            headers={"Link": f"<{resource_url}>; rel=\"resource\""}
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Event creation failed: {str(e)}")
 
