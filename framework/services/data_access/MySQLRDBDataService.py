@@ -32,7 +32,7 @@ class MySQLRDBDataService(DataDataService):
 
             # Create a cursor and execute a paginated query
             cursor = connection.cursor()
-            query = f"SELECT * FROM {database_name}.{table_name} LIMIT {limit} OFFSET {offset}"
+            query = f"SELECT * FROM {database_name}.{table_name} WHERE GuestsRem > 0 LIMIT {limit} OFFSET {offset}"
             cursor.execute(query)
 
             # Fetch all the results (each row will be a dictionary)
