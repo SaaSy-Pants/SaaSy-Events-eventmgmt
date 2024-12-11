@@ -35,6 +35,20 @@ class EventResource(BaseResource):
         result = data_service.get_data_objects(self.database, self.collection, limit, offset)
         return result
     
+    def get_events_by_organizer(self, oid: str, limit: int, offset: int):
+        """
+        Fetch events by organizer ID (OID) with pagination.
+        """
+        query_filter = {"OID": oid}
+        try:
+            result = self.data_service.get_filtered_data_objects(
+                self.database, self.collection, query_filter, limit=limit, offset=offset
+            )
+            return result
+        except Exception as e:
+            raise Exception(f"Failed to fetch events for organizer {oid}: {str(e)}")
+
+    
     def insert_event(self, event: Event) -> bool:
         event_data = event.model_dump()
 
@@ -52,6 +66,24 @@ class EventResource(BaseResource):
             self.database, self.collection, self.key_field, event_id, event_data
         )
         return result
+    
+    def update_field(self, event_id: str, field_name: str, field_value: Any) -> bool:
+        """
+        Update a single field of an event in the database.
+
+        :param event_id: ID of the event to update.
+        :param field_name: The field to update.
+        :param field_value: The new value for the field.
+        :return: True if the update was successful, False otherwise.
+        """
+        try:
+            update_data = {field_name: field_value}
+            result = self.data_service.update_data_object(
+                self.database, self.collection, self.key_field, event_id, update_data
+            )
+            return result
+        except Exception as e:
+            raise Exception(f"Failed to update field {field_name} for event {event_id}: {str(e)}")
 
     def delete_event(self, event_id: str) -> bool:
         result = self.data_service.delete_data_object(

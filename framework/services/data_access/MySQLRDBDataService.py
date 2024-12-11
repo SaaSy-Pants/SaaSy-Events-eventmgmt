@@ -76,6 +76,30 @@ class MySQLRDBDataService(DataDataService):
 
         return result
 
+    def get_filtered_data_objects(self, database_name: str, collection_name: str, filter_criteria: dict, limit: int, offset: int):
+        """
+        Fetch data objects from the database based on filter criteria with pagination.
+        """
+        connection = None
+        try:
+            # Generate WHERE clause from filter_criteria
+            filter_conditions = " AND ".join([f"{key}=\"{value}\"" for (key, value) in filter_criteria.items()])
+            sql_statement = f"SELECT * FROM {database_name}.{collection_name} WHERE {filter_conditions} LIMIT {limit} OFFSET {offset}"
+            
+            connection = self._get_connection()
+            cursor = connection.cursor()
+            cursor.execute(sql_statement)
+            
+            result = cursor.fetchall()
+
+            return result
+        except Exception as e:
+            raise Exception(f"Failed to fetch filtered data objects: {str(e)}")
+        finally:
+            if connection:
+                connection.close()
+
+
 
     def insert_data_object(self, database_name: str, collection_name: str, data: dict) -> bool:
         connection = None
