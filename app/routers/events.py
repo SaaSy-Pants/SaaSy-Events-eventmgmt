@@ -48,27 +48,29 @@ async def update_event(event: Event):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Event update failed: {str(e)}")
 
+class GuestsRemainingUpdate(BaseModel):
+    guests_remaining: int
+
 @router.patch("/events/{eid}/guests_remaining", tags=["event"])
-async def update_guests_remaining(eid: str, guests_remaining: int):
+async def update_guests_remaining(eid: str, payload: GuestsRemainingUpdate):
     """
     Update the guests_remaining field of an event.
     :param eid: Event ID to update.
-    :param guests_remaining: New value for guests_remaining.
+    :param payload: JSON body containing guests_remaining field.
     """
     eve_resource = EventResource(config=None)
     try:
-        # Ensure guests_remaining is a non-negative integer
-        if guests_remaining < 0:
+        if payload.guests_remaining < 0:
             raise HTTPException(status_code=400, detail="guests_remaining cannot be negative")
 
-        success = eve_resource.update_field(eid, "GuestsRem", guests_remaining)
+        success = eve_resource.update_field(eid, "GuestsRem", payload.guests_remaining)
         if not success:
             raise HTTPException(status_code=404, detail="Event not found")
 
         return {
             "message": "Guests remaining updated successfully",
             "EID": eid,
-            "guests_remaining": guests_remaining
+            "guests_remaining": payload.guests_remaining
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Guests remaining update failed: {str(e)}")
