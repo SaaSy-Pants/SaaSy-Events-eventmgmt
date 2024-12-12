@@ -48,7 +48,7 @@ async def update_event(event: Event):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Event update failed: {str(e)}")
 
-@router.patch("/events/{eid}/guests_remaining", tags=["event"])
+@router.patch("/events/{eid}/{guests_remaining}", tags=["event"])
 async def update_guests_remaining(eid: str, guests_remaining: int):
     """
     Update the guests_remaining field of an event.

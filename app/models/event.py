@@ -7,8 +7,8 @@ from datetime import date, timedelta
 
 
 class Event(BaseModel):
-    EID: str = Field(..., max_length=5, description="Event ID")
-    OID: str = Field(..., max_length=5, description="Organizer ID")
+    EID: str = Field(..., max_length=255, description="Event ID")
+    OID: str = Field(..., max_length=255, description="Organizer ID")
     Name: str
     EventCategory: str
     EventDesc: str
