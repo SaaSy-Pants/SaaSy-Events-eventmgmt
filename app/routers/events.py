@@ -36,7 +36,7 @@ async def create_event(event: Event):
         resource_url = f"/events/{event.EID}"
         return JSONResponse(
             status_code=201,
-            content={"message": "Event created successfully"},
+            content={"message": "Event created successfully", 'EID': event.EID},
             headers={"Link": f"<{resource_url}>; rel=\"resource\""}
         )
     except Exception as e:
