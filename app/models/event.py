@@ -1,9 +1,7 @@
 from __future__ import annotations
-
 from typing import Optional
-
-from pydantic import BaseModel, Field
-from datetime import date, timedelta
+from pydantic import BaseModel, Field, model_validator
+from datetime import datetime, date, timedelta
 
 
 class Event(BaseModel):
@@ -19,6 +17,24 @@ class Event(BaseModel):
     GuestsRem: int = Field(..., ge=0, le=32767, description="Number of Guests remaining (smallint)")
     MaxGuestsPerTicket: int
     Price: int = Field(..., ge=0, description="Price of the event")
+
+    @model_validator(mode='before')
+    def serialize_fields(cls, values):
+        event_date = values.get('EventDate')
+        # Convert date and timedelta to strings before serialization
+        if isinstance(event_date, str):
+        # If EventDate is a string, convert it to a datetime object
+            try:
+                event_date = datetime.strptime(event_date, '%Y-%m-%d')
+            except ValueError:
+                raise ValueError("EventDate is not in the correct format")
+        if 'EventDate' in values:
+            values['EventDate'] = event_date.strftime('%Y-%m-%d')
+        if 'EventTimeStart' in values:
+            values['EventTimeStart'] = str(values['EventTimeStart'])
+        if 'EventTimeEnd' in values:
+            values['EventTimeEnd'] = str(values['EventTimeEnd'])
+        return values
 
     class Config:
         json_schema_extra = {

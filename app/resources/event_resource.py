@@ -1,10 +1,14 @@
+import pika
+import json
 from typing import Any
 
 from framework.resources.base_resource import BaseResource
-
 from app.models.event import Event
 from app.services.service_factory import ServiceFactory
 
+import datetime
+
+EVENT_BOOKING_URL = "localhost"
 
 class EventResource(BaseResource):
 
@@ -18,6 +22,13 @@ class EventResource(BaseResource):
         self.collection = "eve_tab"
         self.key_field="EID"
         # TODO -- foreign key
+
+        # Initialize RabbitMQ connection and channel
+        self.rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(EVENT_BOOKING_URL))
+        self.channel = self.rabbitmq_connection.channel()
+
+        # Declare the RabbitMQ exchange and queue (similar to Kafka topic)
+        self.channel.exchange_declare(exchange='event_updates', exchange_type='fanout')
 
     def get_by_key(self, key: str) -> Event:
 
@@ -48,7 +59,6 @@ class EventResource(BaseResource):
         except Exception as e:
             raise Exception(f"Failed to fetch events for organizer {oid}: {str(e)}")
 
-    
     def insert_event(self, event: Event) -> bool:
         event_data = event.model_dump()
 
@@ -61,11 +71,47 @@ class EventResource(BaseResource):
             raise Exception(f"Failed to insert event: {str(e)}")
 
     def update_event(self, event_id: str, event: Event) -> bool:
+        
+        def convert_to_serializable(value):
+            # Check if the value is of type datetime.date
+            if isinstance(value, datetime.date):
+                return value.isoformat()  # Convert to ISO 8601 string format
+            # Check if the value is of type datetime.timedelta
+            elif isinstance(value, datetime.timedelta):
+                # You can convert timedelta to a string or seconds (or another suitable format)
+                return str(value)  # Convert to a string like '1 day, 2:30:00'
+            return value  # Return as is for other types
+
         event_data = event.model_dump()
         result = self.data_service.update_data_object(
             self.database, self.collection, self.key_field, event_id, event_data
         )
+
+        serializable_event_data = {k: convert_to_serializable(v) for k, v in event_data.items()}
+
+        print(result)
+
+        if result:
+            # After event is updated, publish an event to RabbitMQ
+            message = {
+                'event_id': event_id,
+                'updated_data': serializable_event_data
+            }
+            try:
+                self.channel.basic_publish(
+                    exchange='event_updates',
+                    routing_key='',
+                    body=json.dumps(message)  # Serialize message to JSON
+                )
+                print(f"Event update message published to RabbitMQ for event ID: {event_id}")
+            except Exception as rmq_error:
+                # Log the error if publishing fails
+                print(f"Failed to publish event update to RabbitMQ for event ID: {event_id}, Error: {rmq_error}")
+                # Optionally, you can raise an exception here if you need to abort or handle it further
+                # raise Exception(f"Failed to publish event update to RabbitMQ: {rmq_error}")
+
         return result
+
     
     def update_field(self, event_id: str, field_name: str, field_value: Any) -> bool:
         """
